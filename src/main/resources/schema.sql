@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS pending_emails(id int primary key auto_increment, receiver VARCHAR, body varchar, subject varchar, deliver_at timestamp);
