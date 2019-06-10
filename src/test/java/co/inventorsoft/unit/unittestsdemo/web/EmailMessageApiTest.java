@@ -20,11 +20,13 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,7 +56,8 @@ public class EmailMessageApiTest {
     @Test
     public void createShouldCreateEmailMessageAndReturnSuccessResponseWithEmailMessageAsBodyInJsonFormat() throws Exception {
         final EmailMessage expectedEmailMessage = new EmailMessage(null, "test@gmail.com",
-                "Hello", "I'm body", Instant.ofEpochSecond(1542062745).plus(1, ChronoUnit.DAYS));
+                "Hello", "I'm body", Instant.now().with(ChronoField.NANO_OF_SECOND, 0)
+                .plus(1L, ChronoUnit.DAYS));
         final byte[] bodyJson = objectMapper.writeValueAsBytes(
                 Map.of("receiver", expectedEmailMessage.getReceiver(), "subject",
                         expectedEmailMessage.getSubject(), "body",
@@ -66,6 +69,7 @@ public class EmailMessageApiTest {
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         final MvcResult mvcResult = resultMatcher
+                .andDo(print())
                 .andExpect(status().is(200))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
